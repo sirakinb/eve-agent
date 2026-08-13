@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>eve — blank canvas operational agent | Pentridge</title>
+  <meta name="description" content="Overview of Vercel eve: capabilities, Pentridge blank-canvas iMessage setup, and infrastructure for agent-native service businesses." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0c1210;
+      --ink-2: #1a2420;
+      --paper: #e8efe6;
+      --paper-2: #d5e0d2;
+      --fog: #8fa396;
+      --acid: #b8ff3c;
+      --acid-dim: #7aab28;
+      --line: rgba(12, 18, 16, 0.12);
+      --glow: rgba(184, 255, 60, 0.35);
+      --max: 1120px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Bricolage Grotesque", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.55;
+      font-size: 1.05rem;
+      overflow-x: hidden;
+    }
+    code, .mono {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.86em;
+    }
+
+    /* Atmosphere */
+    .grain {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .mesh {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% -10%, rgba(184, 255, 60, 0.22), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 90% 20%, rgba(26, 36, 32, 0.08), transparent 50%),
+        linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+      z-index: -1;
+    }
+
+    a { color: inherit; }
+    a:hover { color: var(--acid-dim); }
+
+    .wrap {
+      width: min(100% - 2.5rem, var(--max));
+      margin-inline: auto;
+    }
+
+    /* Nav */
+    header.top {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(14px);
+      background: color-mix(in srgb, var(--paper) 82%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    .top-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      gap: 1rem;
+    }
+    .brand {
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+    }
+    .brand span {
+      font-family: "IBM Plex Mono", monospace;
+      font-weight: 400;
+      font-size: 0.72rem;
+      color: var(--fog);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 1.1rem;
+      font-size: 0.82rem;
+      font-family: "IBM Plex Mono", monospace;
+    }
+    nav a {
+      text-decoration: none;
+      opacity: 0.7;
+    }
+    nav a:hover { opacity: 1; color: var(--ink); }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      min-height: min(92vh, 820px);
+      display: flex;
+      align-items: flex-end;
+      padding: 4rem 0 3.5rem;
+      isolation: isolate;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 8% -10% auto auto;
+      width: min(52vw, 520px);
+      height: min(52vw, 520px);
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--glow), transparent 68%);
+      filter: blur(8px);
+      animation: pulse 7s var(--ease) infinite;
+      z-index: -1;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+    .hero-kicker {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--acid-dim);
+      margin-bottom: 1.25rem;
+      animation: rise 0.9s var(--ease) both;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 9vw, 6.4rem);
+      line-height: 0.92;
+      letter-spacing: -0.055em;
+      font-weight: 800;
+      max-width: 11ch;
+      animation: rise 1s 0.08s var(--ease) both;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--ink);
+    }
+    .hero-lead {
+      margin-top: 1.5rem;
+      max-width: 36rem;
+      font-size: 1.15rem;
+      color: var(--ink-2);
+      opacity: 0.85;
+      animation: rise 1s 0.16s var(--ease) both;
+    }
+    .hero-meta {
+      margin-top: 2.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      animation: rise 1s 0.24s var(--ease) both;
+    }
+    .chip {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 70%, white);
+      border-radius: 999px;
+    }
+    .chip.hot {
+      background: var(--ink);
+      color: var(--acid);
+      border-color: var(--ink);
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* Sections */
+    section {
+      padding: 4.5rem 0;
+      border-top: 1px solid var(--line);
+    }
+    .sec-label {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--fog);
+      margin-bottom: 0.85rem;
+    }
+    h2 {
+      font-size: clamp(1.85rem, 4vw, 2.75rem);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      font-weight: 800;
+      max-width: 18ch;
+      margin-bottom: 0.85rem;
+    }
+    .sec-intro {
+      max-width: 38rem;
+      color: var(--ink-2);
+      opacity: 0.85;
+      margin-bottom: 2.25rem;
+    }
+
+    /* Capability grid — not card-heavy; ruled rows */
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--ink);
+    }
+    .cap {
+      padding: 1.35rem 1.1rem 1.5rem 0;
+      border-bottom: 1px solid var(--line);
+      padding-right: 1.5rem;
+      transition: background 0.35s var(--ease);
+    }
+    .cap:hover { background: color-mix(in srgb, var(--acid) 12%, transparent); }
+    .cap h3 {
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+    .cap p {
+      font-size: 0.92rem;
+      opacity: 0.78;
+    }
+    .cap .tag {
+      display: inline-block;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--acid-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 1.5rem;
+      border-left: 2px solid var(--ink);
+    }
+    .step {
+      position: relative;
+      padding: 0 0 2rem 1.25rem;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step::before {
+      content: "";
+      position: absolute;
+      left: -1.5rem;
+      top: 0.35rem;
+      width: 0.7rem;
+      height: 0.7rem;
+      background: var(--acid);
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      transform: translateX(-55%);
+    }
+    .step .n {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--fog);
+      margin-bottom: 0.25rem;
+    }
+    .step h3 {
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+    .step p { font-size: 0.95rem; opacity: 0.8; max-width: 40rem; }
+    .step code {
+      background: var(--ink);
+      color: var(--acid);
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    /* Infra bands */
+    .bands {
+      display: grid;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .band {
+      background: var(--paper);
+      padding: 1.5rem 1.35rem;
+      display: grid;
+      grid-template-columns: minmax(120px, 180px) 1fr;
+      gap: 1rem 1.5rem;
+    }
+    @media (max-width: 700px) {
+      .band { grid-template-columns: 1fr; }
+    }
+    .band h3 {
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .band p { font-size: 0.92rem; opacity: 0.8; }
+    .band ul {
+      list-style: none;
+      margin-top: 0.65rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .band li {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.68rem;
+      padding: 0.3rem 0.55rem;
+      background: var(--ink-2);
+      color: var(--paper);
+      border-radius: 2px;
+    }
+
+    /* Status table */
+    .status {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .status th, .status td {
+      text-align: left;
+      padding: 0.85rem 0.75rem 0.85rem 0;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    .status th {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fog);
+      font-weight: 500;
+    }
+    .dot {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      margin-right: 0.45rem;
+      vertical-align: middle;
+    }
+    .dot.live { background: var(--acid-dim); box-shadow: 0 0 0 3px var(--glow); }
+    .dot.next { background: var(--fog); }
+    .dot.later { background: transparent; border: 1.5px solid var(--fog); }
+
+    /* Diagram */
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+    }
+    .flow .node {
+      padding: 0.65rem 0.9rem;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 4px;
+    }
+    .flow .node.accent {
+      background: var(--acid);
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .flow .arrow {
+      color: var(--fog);
+      font-size: 1rem;
+    }
+
+    /* Quote / principle */
+    .callout {
+      margin-top: 2.5rem;
+      padding: 1.75rem 0;
+      border-top: 2px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+      font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      font-weight: 600;
+      max-width: 28ch;
+    }
+
+    footer {
+      padding: 3rem 0 4rem;
+      border-top: 1px solid var(--ink);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--fog);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .reveal.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <div class="brand">eve <span>by Vercel · Pentridge</span></div>
+      <nav>
+        <a href="#framework">Framework</a>
+        <a href="#build">What we built</a>
+        <a href="#infra">Infrastructure</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="mesh" aria-hidden="true"></div>
+      <div class="wrap">
+        <p class="hero-kicker">Filesystem-first · durable · agent-native</p>
+        <h1>eve<em>.</em> your own harness</h1>
+        <p class="hero-lead">
+          Vercel’s framework for durable backend agents. Pentridge uses it as tenant zero:
+          a blank-canvas cofounder on iMessage — the first run of an agent-native operating system for service businesses.
+        </p>
+        <div class="hero-meta">
+          <span class="chip hot">Live · +1 (628) 264-7648</span>
+          <span class="chip">Model · openai/gpt-5.6-luna</span>
+          <span class="chip">Host · Vercel</span>
+          <span class="chip">Channel · Photon iMessage</span>
+        </div>
+      </div>
+    </div>
+
+    <section id="framework">
+      <div class="wrap">
+        <p class="sec-label">01 · The framework</p>
+        <h2 class="reveal">What eve gives you access to</h2>
+        <p class="sec-intro reveal">
+          An agent is a directory on disk. Instructions, tools, skills, connections, channels, sandboxes,
+          subagents, and schedules are files — eve compiles and runs them as a durable service.
+        </p>
+
+        <div class="cap-grid reveal">
+          <article class="cap">
+            <span class="tag">Core</span>
+            <h3>Instructions</h3>
+            <p>Always-on system prompt: identity, standing rules, constraints. Short and stable.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Core</span>
+            <h3>Tools</h3>
+            <p>Typed actions in your runtime — APIs, memory writes, approvals for irreversible work.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Core</span>
+            <h3>Skills</h3>
+            <p>On-demand procedures loaded when relevant. Progressive disclosure, not prompt bloat.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Reach</span>
+            <h3>Channels</h3>
+            <p>HTTP, Slack, Discord, Telegram, Twilio SMS, Photon iMessage, GitHub, Linear, web chat, and more.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Reach</span>
+            <h3>Connections</h3>
+            <p>MCP and OpenAPI services — CRM, Notion, Linear, GitHub — credentials never exposed to the model.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Runtime</span>
+            <h3>Sandbox</h3>
+            <p>Isolated shell + <code>/workspace</code> filesystem per session. Seed files, network policy, Vercel Sandbox.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Runtime</span>
+            <h3>Durable sessions</h3>
+            <p>Checkpointed turns, streaming, human-in-the-loop pause/resume across crashes and redeploys.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Scale</span>
+            <h3>Subagents &amp; remote agents</h3>
+            <p>Specialists with their own tools, or another eve deployment as a child. Fan-out with Workflow.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Scale</span>
+            <h3>Schedules</h3>
+            <p>Cron prompts and handlers — digests, syncs, heartbeats that wake the agent without a human ping.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Quality</span>
+            <h3>Evals</h3>
+            <p>Scored checks against real sessions. Gate regressions when prompts or tools change.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Ops</span>
+            <h3>Deploy &amp; Agent Runs</h3>
+            <p>Vercel Workflow + Sandbox. Inspect traces, tool calls, token usage in production.</p>
+          </article>
+          <article class="cap">
+            <span class="tag">Models</span>
+            <h3>AI Gateway</h3>
+            <p>Route <code>provider/model</code> strings through Vercel AI Gateway — Anthropic, OpenAI, and more.</p>
+          </article>
+        </div>
+
+        <p class="callout reveal">
+          Coding harnesses build software. eve runs the business — wake, remember, connect, approve.
+        </p>
+      </div>
+    </section>
+
+    <section id="build">
+      <div class="wrap">
+        <p class="sec-label">02 · Pentridge tenant zero</p>
+        <h2 class="reveal">How we stood up the blank canvas</h2>
+        <p class="sec-intro reveal">
+          Intentional thin agent: cofounder to Aki, iMessage surface, no premature specialists.
+          Rails live; strategy gets filled step by step.
+        </p>
+
+        <div class="timeline reveal">
+          <div class="step">
+            <div class="n">Step 01</div>
+            <h3>Scaffold eve</h3>
+            <p>Installed the eve skill, Node 24+, <code>eve init</code> in-repo. Agent is files under <code>agent/</code>.</p>
+          </div>
+          <div class="step">
+            <div class="n">Step 02</div>
+            <h3>Model credential</h3>
+            <p>Vercel AI Gateway key in <code>.env.local</code>. Lead model set to <code>openai/gpt-5.6-luna</code> (Opus 5 blocked on this key).</p>
+          </div>
+          <div class="step">
+            <div class="n">Step 03</div>
+            <h3>First surface — iMessage</h3>
+            <p>
+              <code>eve add channel/photon-imessage</code> with Vercel Connect, Photon project, phone registration.
+              Agent number <strong>+1 (628) 264-7648</strong>. Webhooks → <code>/eve/v1/photon</code>.
+            </p>
+          </div>
+          <div class="step">
+            <div class="n">Step 04</div>
+            <h3>Deploy</h3>
+            <p>Linked Vercel project <code>pentridge-agent</code>, <code>eve deploy</code> to production. Agent is always-on.</p>
+          </div>
+          <div class="step">
+            <div class="n">Step 05</div>
+            <h3>Blank-canvas reset</h3>
+            <p>
+              Stripped premature subagents/skills/schedules. Kept Photon, deploy, Luna, thin memory tools
+              (<code>remember</code> / <code>recall</code> / <code>log_decision</code>. Empty workspace stubs for company truth.
+            </p>
+          </div>
+        </div>
+
+        <div class="flow reveal">
+          <span class="node">You · iMessage</span>
+          <span class="arrow">→</span>
+          <span class="node">Photon</span>
+          <span class="arrow">→</span>
+          <span class="node accent">eve on Vercel</span>
+          <span class="arrow">→</span>
+          <span class="node">AI Gateway · Luna</span>
+          <span class="arrow">→</span>
+          <span class="node">Tools · Sandbox</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="infra">
+      <div class="wrap">
+        <p class="sec-label">03 · Infrastructure to build out</p>
+        <h2 class="reveal">Database, auth, privacy, workspace, agents</h2>
+        <p class="sec-intro reveal">
+          Session state and sandbox files are enough for cofounder experiments.
+          Client-ready tenants need isolation, durable memory, and a control plane.
+        </p>
+
+        <div class="bands reveal">
+          <div class="band">
+            <h3>Database</h3>
+            <div>
+              <p>
+                Postgres for company memory across sessions: facts, decisions, entities, tenant scope.
+                Session <code>defineState</code> stays short-term; sandbox stays scratchpad.
+              </p>
+              <ul>
+                <li>InsForge · if DX wins</li>
+                <li>Supabase / Neon · next to Vercel</li>
+                <li>RLS · tenant_id</li>
+              </ul>
+            </div>
+          </div>
+          <div class="band">
+            <h3>Authentication</h3>
+            <div>
+              <p>
+                Replace placeholder HTTP auth. Channel allowlists (who can text). Vercel Connect for OAuth connectors.
+                Principals on <code>ctx.session.auth</code> for dynamic instructions and tools.
+              </p>
+              <ul>
+                <li>OIDC / Auth.js / Clerk</li>
+                <li>iMessage allowlist</li>
+                <li>Connect · Slack GitHub CRM</li>
+              </ul>
+            </div>
+          </div>
+          <div class="band">
+            <h3>Security &amp; privacy</h3>
+            <div>
+              <p>
+                Tenant isolation, least-privilege tokens, approval gates on irreversible actions,
+                know model/provider retention, audit tool calls, retention/export for clients.
+              </p>
+              <ul>
+                <li>Approval · always()</li>
+                <li>Secrets · env only</li>
+                <li>Sandbox · network policy</li>
+                <li>Disclosure · non-owners</li>
+              </ul>
+            </div>
+          </div>
+          <div class="band">
+            <h3>Agent Workspace</h3>
+            <div>
+              <p>
+                Control plane: company context, live agent status, SOPs, skills.
+                Eve is the runtime; the workspace is where operators see what agents are doing —
+                and where CRM / PM data lands for agents to work from.
+              </p>
+              <ul>
+                <li>Context hub</li>
+                <li>Status / activity</li>
+                <li>Pentridge MCP</li>
+              </ul>
+            </div>
+          </div>
+          <div class="band">
+            <h3>Flexibility</h3>
+            <div>
+              <p>
+                Filesystem-first means new capability = new file. Dynamic instructions/tools per tenant.
+                Add channels without rewriting the brain. Skills for procedures; tools for actions; workflows for repeatable paths.
+              </p>
+              <ul>
+                <li>defineDynamic</li>
+                <li>Remote agents</li>
+                <li>Extensions</li>
+              </ul>
+            </div>
+          </div>
+          <div class="band">
+            <h3>Other agents &amp; surfaces</h3>
+            <div>
+              <p>
+                Subagents and remote eve deployments talk to each other. Same brain, many doors:
+                Slack, SMS, Instagram/Messenger adapters, web chat, coding agents via MCP.
+                Platforms like Buzz or Grok bots become additional surfaces — not a second company brain.
+              </p>
+              <ul>
+                <li>Subagents</li>
+                <li>Remote agents</li>
+                <li>MCP bridges</li>
+                <li>Multi-surface</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="wrap">
+        <p class="sec-label">04 · Now vs next</p>
+        <h2 class="reveal">What is live · what comes next</h2>
+        <p class="sec-intro reveal">
+          Repeatable playbook: blank canvas + first surface + memory DB, then connectors and depth by tier.
+        </p>
+
+        <table class="status reveal">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>State</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>eve harness + Luna</td>
+              <td><span class="dot live"></span>Live</td>
+              <td>Blank-canvas cofounder instructions, thin memory tools</td>
+            </tr>
+            <tr>
+              <td>iMessage (Photon)</td>
+              <td><span class="dot live"></span>Live</td>
+              <td>+16282647648 → pentridge-agent.vercel.app</td>
+            </tr>
+            <tr>
+              <td>Sandbox workspace stubs</td>
+              <td><span class="dot live"></span>Live</td>
+              <td>COMPANY / FOUNDER / MEMORY — fill with Aki</td>
+            </tr>
+            <tr>
+              <td>Postgres long-term memory</td>
+              <td><span class="dot next"></span>Next</td>
+              <td>InsForge or Supabase; tenant-scoped</td>
+            </tr>
+            <tr>
+              <td>Auth hardening</td>
+              <td><span class="dot next"></span>Next</td>
+              <td>Replace placeholderAuth; surface allowlists</td>
+            </tr>
+            <tr>
+              <td>CRM / PM connectors</td>
+              <td><span class="dot next"></span>Next</td>
+              <td>When a concrete workflow needs them</td>
+            </tr>
+            <tr>
+              <td>Agent Workspace control plane</td>
+              <td><span class="dot later"></span>Later</td>
+              <td>Status, approvals UI, multi-tenant dashboard</td>
+            </tr>
+            <tr>
+              <td>Specialists / multi-agent</td>
+              <td><span class="dot later"></span>Later</td>
+              <td>Only when a stage earns a specialist</td>
+            </tr>
+            <tr>
+              <td>Extra surfaces (Slack, SMS…)</td>
+              <td><span class="dot later"></span>Later</td>
+              <td>Same brain, new channel file</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="callout reveal">
+          Same pattern for White Law or Jackson: blank canvas, one surface, database, then depth.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <div class="wrap">
+    <footer>
+      <div>
+        Pentridge · agent-native OS for service businesses<br />
+        Framework docs: <a href="https://eve.dev/docs" target="_blank" rel="noopener">eve.dev/docs</a>
+      </div>
+      <div>
+        Generated for internal alignment · eve blank canvas overview
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const els = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add("in");
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>

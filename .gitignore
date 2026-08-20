@@ -24,3 +24,5 @@ node_modules/
 .roo
 .trae
 .windsurf
+.env*
+.env*.local

@@ -49,3 +49,7 @@ export function requireHeader(envName: string) {
     return value;
   };
 }
+
+export function requireBearer(envName: string) {
+  return () => `Bearer ${requireHeader(envName)()}`;
+}
